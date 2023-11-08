@@ -41,18 +41,18 @@ def image_input(confidence):
 
 def _display_detected_frames(conf, model, st_frame, image, is_display_tracking=None, tracker=None):
 
-    image = cv2.resize(image, (720, int(720*(9/16))))
+	image = cv2.resize(image, (720, int(720*(9/16))))
 
-    if is_display_tracking:
-        res = model.track(image, conf=conf, persist=True, tracker=tracker)
-    else:
-        res = model.predict(image, conf=conf)
+	if is_display_tracking:
+		res = model.track(image, conf=conf, persist=True, tracker=tracker)
+	else:
+		res = model.predict(image, conf=conf)
 
-    res_plotted = res[0].plot()
-    st_frame.image(res_plotted,
-                   caption='Detected Video',
-                   channels="BGR",
-                   use_column_width=True)
+	res_plotted = res[0].plot()	
+	st_frame.image(res_plotted,
+				   caption='Видео с детекцией',
+				   channels="BGR",
+				   use_column_width="auto")
 				   
 
 def video_input(conf):
@@ -88,6 +88,54 @@ def video_input(conf):
 	if st.sidebar.button("Запустить детекцию"):
 		try:
 			vid_cap = cv2.VideoCapture(tffile.name)
+			
+			# для выравнивания видео по центру нужны колонки
+			col1, col2, col3 = st.columns((2, 10, 2))
+			with col2:
+				st_frame = st.empty()
+				while (vid_cap.isOpened()):
+					success, image = vid_cap.read()
+					if success:							
+							_display_detected_frames(conf,model,st_frame,image)
+					else:
+						vid_cap.release()
+						break
+				
+
+						
+		except Exception as e:
+			st.sidebar.error("Ошибка загрузки видео: " + str(e))
+			
+		kpi1, kpi2, kpi3 = st.columns(3)
+		with kpi1:
+			st.markdown('**Frame Rate**')
+			kpi1_text = st.markdown('0')
+			
+		with kpi2:
+			st.markdown('**Всего объектов**')
+			kpi1_text = st.markdown('0')
+			
+		with kpi3:
+			st.markdown('**Разрешение**')
+			kpi1_text = st.markdown('0')
+		
+	return
+	
+	
+
+def rtsp_stream(conf):
+
+	source_rtsp = st.sidebar.text_input("Ссылка rtsp:")
+	st.sidebar.caption('Пример ссылки: rtsp://admin:12345@192.168.1.210:554/Streaming/Channels/101')
+	
+	# !!!!!!!!!!!! Здесь нужна наша модель для видео	
+	model = YOLO('models/yolov8n.pt')
+	
+	# кнопка Запустить
+	if st.sidebar.button("Запустить детекцию") and source_rtsp:
+	
+		try:
+			vid_cap = cv2.VideoCapture(source_rtsp)
 			st_frame = st.empty()
 			while (vid_cap.isOpened()):
 				success, image = vid_cap.read()
@@ -100,26 +148,8 @@ def video_input(conf):
 					vid_cap.release()
 					break
 		except Exception as e:
-			st.sidebar.error("Ошибка загрузки видео: " + str(e))
-			
-		
-	kpi1, kpi2, kpi3 = st.columns(3)
-	with kpi1:
-		st.markdown('**Frame Rate**')
-		kpi1_text = st.markdown('0')
-		
-	with kpi2:
-		st.markdown('**Всего объектов**')
-		kpi1_text = st.markdown('0')
-		
-	with kpi3:
-		st.markdown('**Разрешение**')
-		kpi1_text = st.markdown('0')
-		
-	return	
-
-def potok():
-	return
+			vid_cap.release()
+			st.sidebar.error("Ошибка загрузки потока RTSP: " + str(e))
 	
 
 def main():
@@ -135,7 +165,7 @@ def main():
 
 	
 	# input options
-	input_option = st.sidebar.radio("Выберите режим работы:", ['Картинка', 'Видео', 'Видеопоток'])
+	input_option = st.sidebar.radio("Выберите режим работы:", ['Картинка', 'Видео', 'Видеопоток (rtsp)'])
 	
 	confidence = st.sidebar.slider('Confidence', min_value=0.0, max_value=1.0, value=0.3)
 	
@@ -151,6 +181,9 @@ def main():
 	
 	elif input_option == 'Видео':
 		video_input(confidence)
+		
+	elif input_option == 'Видеопоток (rtsp)':
+		rtsp_stream(confidence)
 	
 
 	
