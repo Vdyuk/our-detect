@@ -126,7 +126,7 @@ def video_input(conf):
 def rtsp_stream(conf):
 
 	source_rtsp = st.sidebar.text_input("Ссылка rtsp:")
-	st.sidebar.caption('Пример ссылки: rtsp://rtsp:Rtsp1234@188.170.176.190:8031/Streaming/Channels/101?transportmode=unicast&profile=Profile_1')
+	st.sidebar.caption('Пример ссылки: rtsp://rtsp:A1234567@188.170.176.190:8028/Streaming/Channels/101?transportmode=unicast&profile=Profile_1')
 	
 	# !!!!!!!!!!!! Здесь нужна наша модель для видео	
 	model = YOLO('models/yolov8n.pt')
