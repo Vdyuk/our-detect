@@ -24,9 +24,9 @@ def image_input(confidence):
 	with col1:
 		st.image(uploaded_image, caption="Исходная картинка", use_column_width=True)
 		
-	# !!!!!!!!!!!! Здесь нужна наша модель для картинки
+	# !!!!!!!!!!!!
 	
-	model = YOLO('models/yolov8n.pt')
+	model = YOLO('models/yolo_8m_yaroslav.pt')
 	
 	with col2:
 		res = model.predict(uploaded_image,	conf=confidence)
@@ -81,9 +81,9 @@ def video_input(conf):
 		st.sidebar.video(demo_bytes)
 	
 
-	# !!!!!!!!!!!! Здесь нужна наша модель для видео
+	# !!!!!!!!!!!!
 	
-	model = YOLO('models/yolov8n.pt')
+	model = YOLO('models/yolo_8m_yaroslav.pt')
 	# кнопка Запустить
 	if st.sidebar.button("Запустить детекцию"):
 		try:
